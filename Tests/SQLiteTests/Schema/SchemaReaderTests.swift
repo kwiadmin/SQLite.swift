@@ -121,12 +121,12 @@ class SchemaReaderTests: SQLiteTestCase {
     func test_foreignKeys() throws {
         let linkTable = Table("test_links")
 
-        let idColumn = SQLite.Expression<Int64>("id")
-        let testIdColumn = SQLite.Expression<Int64>("test_id")
+        let idColumn = SQLite.SQLExpression<Int64>("id")
+        let testIdColumn = SQLite.SQLExpression<Int64>("test_id")
 
         try db.run(linkTable.create(block: { definition in
             definition.column(idColumn, primaryKey: .autoincrement)
-            definition.column(testIdColumn, unique: false, check: nil, references: users, Expression<Int64>("id"))
+            definition.column(testIdColumn, unique: false, check: nil, references: users, SQLExpression<Int64>("id"))
         }))
 
         let foreignKeys = try schemaReader.foreignKeys(table: "test_links")
@@ -163,7 +163,7 @@ class SchemaReaderTests: SQLiteTestCase {
     }
 
     func test_objectDefinitions_indexes() throws {
-        let emailIndex = users.createIndex(Expression<String>("email"), unique: false, ifNotExists: true)
+        let emailIndex = users.createIndex(SQLExpression<String>("email"), unique: false, ifNotExists: true)
         try db.run(emailIndex)
 
         let indexes = try schemaReader.objectDefinitions(type: .index)

@@ -43,10 +43,10 @@ public enum Collation {
 
 }
 
-extension Collation: Expressible {
+extension Collation: SQLExpressible {
 
-    public var expression: Expression<Void> {
-        Expression(literal: description)
+    public var expression: SQLExpression<Void> {
+        SQLExpression(literal: description)
     }
 
 }

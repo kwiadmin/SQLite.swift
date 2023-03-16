@@ -43,14 +43,14 @@ open class SQLFTS5Config: SQLFTSConfig {
     }
 
     var detail: Detail?
-    var contentRowId: Expressible?
+    var contentRowId: SQLExpressible?
     var columnSize: Int?
 
     override public init() {
     }
 
     /// [External Content Tables](https://www.sqlite.org/fts5.html#section_4_4_2)
-    @discardableResult open func contentRowId(_ column: Expressible) -> Self {
+    @discardableResult open func contentRowId(_ column: SQLExpressible) -> Self {
         contentRowId = column
         return self
     }
@@ -73,7 +73,7 @@ open class SQLFTS5Config: SQLFTSConfig {
             options.append("content_rowid", value: contentRowId)
         }
         if let columnSize = columnSize {
-            options.append("columnsize", value: Expression<Int>(value: columnSize))
+            options.append("columnsize", value: SQLExpression<Int>(value: columnSize))
         }
         if let detail = detail {
             options.append("detail", value: detail.rawValue)
@@ -81,10 +81,10 @@ open class SQLFTS5Config: SQLFTSConfig {
         return options
     }
 
-    override func formatColumnDefinitions() -> [Expressible] {
+    override func formatColumnDefinitions() -> [SQLExpressible] {
         columnDefinitions.map { definition in
             if definition.options.contains(.unindexed) {
-                return " ".join([definition.0, Expression<Void>(literal: "UNINDEXED")])
+                return " ".join([definition.0, SQLExpression<Void>(literal: "UNINDEXED")])
             } else {
                 return definition.0
             }

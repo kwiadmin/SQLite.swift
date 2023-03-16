@@ -46,7 +46,7 @@ extension QueryType {
     ///   -  subquery: A query that generates the rows for the table expression.
     ///
     /// - Returns: A query with the given `ORDER BY` clause applied.
-    public func with(_ alias: Table, columns: [Expressible]? = nil, recursive: Bool = false,
+    public func with(_ alias: Table, columns: [SQLExpressible]? = nil, recursive: Bool = false,
                      hint: MaterializationHint? = nil, as subquery: QueryType) -> Self {
         var query = self
         let clause = WithClauses.Clause(alias: alias, columns: columns, hint: hint, query: subquery)
@@ -56,39 +56,39 @@ extension QueryType {
     }
 
     /// self.clauses.with transformed to an Expressible
-    var withClause: Expressible? {
+    var withClause: SQLExpressible? {
         guard !clauses.with.clauses.isEmpty else {
             return nil
         }
 
         let innerClauses = ", ".join(clauses.with.clauses.map { (clause) in
-            let hintExpr: Expression<Void>?
+            let hintExpr: SQLExpression<Void>?
             if let hint = clause.hint {
-                hintExpr = Expression<Void>(literal: hint.rawValue)
+                hintExpr = SQLExpression<Void>(literal: hint.rawValue)
             } else {
                 hintExpr = nil
             }
 
-            let columnExpr: Expression<Void>?
+            let columnExpr: SQLExpression<Void>?
             if let columns = clause.columns {
                 columnExpr = "".wrap(", ".join(columns))
             } else {
                 columnExpr = nil
             }
 
-            let expressions: [Expressible?] = [
+            let expressions: [SQLExpressible?] = [
                 clause.alias.tableName(),
                 columnExpr,
-                Expression<Void>(literal: "AS"),
+                SQLExpression<Void>(literal: "AS"),
                 hintExpr,
-                "".wrap(clause.query) as Expression<Void>
+                "".wrap(clause.query) as SQLExpression<Void>
             ]
 
             return " ".join(expressions.compactMap { $0 })
         })
 
         return " ".join([
-            Expression<Void>(literal: clauses.with.recursive ? "WITH RECURSIVE" : "WITH"),
+            SQLExpression<Void>(literal: clauses.with.recursive ? "WITH RECURSIVE" : "WITH"),
             innerClauses
         ])
     }
@@ -105,7 +105,7 @@ public enum MaterializationHint: String {
 struct WithClauses {
     struct Clause {
         var alias: Table
-        var columns: [Expressible]?
+        var columns: [SQLExpressible]?
         var hint: MaterializationHint?
         var query: QueryType
     }

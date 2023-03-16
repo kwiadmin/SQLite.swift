@@ -24,11 +24,11 @@
 
 extension Module {
 
-    public static func FTS4(_ column: Expressible, _ more: Expressible...) -> Module {
+    public static func FTS4(_ column: SQLExpressible, _ more: SQLExpressible...) -> Module {
         FTS4([column] + more)
     }
 
-    public static func FTS4(_ columns: [Expressible] = [], tokenize tokenizer: Tokenizer? = nil) -> Module {
+    public static func FTS4(_ columns: [SQLExpressible] = [], tokenize tokenizer: Tokenizer? = nil) -> Module {
         FTS4(SQLFTS4Config().columns(columns).tokenizer(tokenizer))
     }
 
@@ -51,15 +51,15 @@ extension VirtualTable {
     ///
     /// - Returns: An expression appended with a `MATCH` query against the given
     ///   pattern.
-    public func match(_ pattern: String) -> Expression<Bool> {
+    public func match(_ pattern: String) -> SQLExpression<Bool> {
         "MATCH".infix(tableName(), pattern)
     }
 
-    public func match(_ pattern: Expression<String>) -> Expression<Bool> {
+    public func match(_ pattern: SQLExpression<String>) -> SQLExpression<Bool> {
         "MATCH".infix(tableName(), pattern)
     }
 
-    public func match(_ pattern: Expression<String?>) -> Expression<Bool?> {
+    public func match(_ pattern: SQLExpression<String?>) -> SQLExpression<Bool?> {
         "MATCH".infix(tableName(), pattern)
     }
 
@@ -77,11 +77,11 @@ extension VirtualTable {
         filter(match(pattern))
     }
 
-    public func match(_ pattern: Expression<String>) -> QueryType {
+    public func match(_ pattern: SQLExpression<String>) -> QueryType {
         filter(match(pattern))
     }
 
-    public func match(_ pattern: Expression<String?>) -> QueryType {
+    public func match(_ pattern: SQLExpression<String?>) -> QueryType {
         filter(match(pattern))
     }
 
@@ -153,7 +153,7 @@ open class SQLFTSConfig {
         case unindexed
     }
 
-    typealias ColumnDefinition = (Expressible, options: [ColumnOption])
+    typealias ColumnDefinition = (SQLExpressible, options: [ColumnOption])
     var columnDefinitions = [ColumnDefinition]()
     var tokenizer: Tokenizer?
     var prefixes = [Int]()
@@ -161,12 +161,12 @@ open class SQLFTSConfig {
     var isContentless: Bool = false
 
     /// Adds a column definition
-    @discardableResult open func column(_ column: Expressible, _ options: [ColumnOption] = []) -> Self {
+    @discardableResult open func column(_ column: SQLExpressible, _ options: [ColumnOption] = []) -> Self {
         columnDefinitions.append((column, options))
         return self
     }
 
-    @discardableResult open func columns(_ columns: [Expressible]) -> Self {
+    @discardableResult open func columns(_ columns: [SQLExpressible]) -> Self {
         for column in columns {
             self.column(column)
         }
@@ -197,11 +197,11 @@ open class SQLFTSConfig {
         return self
     }
 
-    func formatColumnDefinitions() -> [Expressible] {
+    func formatColumnDefinitions() -> [SQLExpressible] {
         columnDefinitions.map { $0.0 }
     }
 
-    func arguments() -> [Expressible] {
+    func arguments() -> [SQLExpressible] {
         options().arguments
     }
 
@@ -209,7 +209,7 @@ open class SQLFTSConfig {
         var options = Options()
         options.append(formatColumnDefinitions())
         if let tokenizer = tokenizer {
-            options.append("tokenize", value: Expression<Void>(literal: tokenizer.description))
+            options.append("tokenize", value: SQLExpression<Void>(literal: tokenizer.description))
         }
         options.appendCommaSeparated("prefix", values: prefixes.sorted().map { String($0) })
         if isContentless {
@@ -221,9 +221,9 @@ open class SQLFTSConfig {
     }
 
     struct Options {
-        var arguments = [Expressible]()
+        var arguments = [SQLExpressible]()
 
-        @discardableResult mutating func append(_ columns: [Expressible]) -> Options {
+        @discardableResult mutating func append(_ columns: [SQLExpressible]) -> Options {
             arguments.append(contentsOf: columns)
             return self
         }
@@ -237,11 +237,11 @@ open class SQLFTSConfig {
         }
 
         @discardableResult mutating func append(_ key: String, value: String) -> Options {
-            append(key, value: Expression<String>(value))
+            append(key, value: SQLExpression<String>(value))
         }
 
-        @discardableResult mutating func append(_ key: String, value: Expressible) -> Options {
-            arguments.append("=".join([Expression<Void>(literal: key), value]))
+        @discardableResult mutating func append(_ key: String, value: SQLExpressible) -> Options {
+            arguments.append("=".join([SQLExpression<Void>(literal: key), value]))
             return self
         }
     }
