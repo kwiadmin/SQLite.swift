@@ -29,10 +29,10 @@ extension Module {
     }
 
     public static func FTS4(_ columns: [Expressible] = [], tokenize tokenizer: Tokenizer? = nil) -> Module {
-        FTS4(FTS4Config().columns(columns).tokenizer(tokenizer))
+        FTS4(SQLFTS4Config().columns(columns).tokenizer(tokenizer))
     }
 
-    public static func FTS4(_ config: FTS4Config) -> Module {
+    public static func FTS4(_ config: SQLFTS4Config) -> Module {
         Module(name: "fts4", arguments: config.arguments())
     }
 }
@@ -147,7 +147,7 @@ extension Tokenizer: CustomStringConvertible {
 
 /// Configuration options shared between the [FTS4](https://www.sqlite.org/fts3.html) and
 /// [FTS5](https://www.sqlite.org/fts5.html) extensions.
-open class FTSConfig {
+open class SQLFTSConfig {
     public enum ColumnOption {
         /// [The notindexed= option](https://www.sqlite.org/fts3.html#section_6_5)
         case unindexed
@@ -248,7 +248,7 @@ open class FTSConfig {
 }
 
 /// Configuration for the [FTS4](https://www.sqlite.org/fts3.html) extension.
-open class FTS4Config: FTSConfig {
+open class SQLFTS4Config: SQLFTSConfig {
     /// [The matchinfo= option](https://www.sqlite.org/fts3.html#section_6_4)
     public enum MatchInfo: String {
         case fts3

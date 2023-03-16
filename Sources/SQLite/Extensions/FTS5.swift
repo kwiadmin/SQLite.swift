@@ -23,7 +23,7 @@
 //
 
 extension Module {
-    public static func FTS5(_ config: FTS5Config) -> Module {
+    public static func FTS5(_ config: SQLFTS5Config) -> Module {
         Module(name: "fts5", arguments: config.arguments())
     }
 }
@@ -32,7 +32,7 @@ extension Module {
 ///
 /// **Note:** this is currently only applicable when using SQLite.swift together with a FTS5-enabled version
 /// of SQLite.
-open class FTS5Config: FTSConfig {
+open class SQLFTS5Config: SQLFTSConfig {
     public enum Detail: String {
         /// store rowid, column number, term offset
         case full

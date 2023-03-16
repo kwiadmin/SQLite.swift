@@ -40,7 +40,7 @@ extension QueryType {
     ///
     /// - Returns: An `INSERT` statement for the encodable object
     public func insert(_ encodable: Encodable, userInfo: [CodingUserInfoKey: Any] = [:], otherSetters: [Setter] = []) throws -> Insert {
-        let encoder = SQLiteEncoder(userInfo: userInfo)
+        let encoder = SQLSQLiteEncoder(userInfo: userInfo)
         try encodable.encode(to: encoder)
         return self.insert(encoder.setters + otherSetters)
     }
@@ -65,7 +65,7 @@ extension QueryType {
     /// - Returns: An `INSERT` statement fort the encodable object
     public func insert(or onConflict: OnConflict, encodable: Encodable, userInfo: [CodingUserInfoKey: Any] = [:],
                        otherSetters: [Setter] = []) throws -> Insert {
-        let encoder = SQLiteEncoder(userInfo: userInfo)
+        let encoder = SQLSQLiteEncoder(userInfo: userInfo)
         try encodable.encode(to: encoder)
         return self.insert(or: onConflict, encoder.setters + otherSetters)
     }
@@ -87,7 +87,7 @@ extension QueryType {
     public func insertMany(_ encodables: [Encodable], userInfo: [CodingUserInfoKey: Any] = [:],
                            otherSetters: [Setter] = []) throws -> Insert {
         let combinedSettersWithoutNils = try encodables.map { encodable -> [Setter] in
-            let encoder = SQLiteEncoder(userInfo: userInfo, forcingNilValueSetters: false)
+            let encoder = SQLSQLiteEncoder(userInfo: userInfo, forcingNilValueSetters: false)
             try encodable.encode(to: encoder)
             return encoder.setters + otherSetters
         }
@@ -95,7 +95,7 @@ extension QueryType {
         guard Set(combinedSettersWithoutNils.map(\.count)).count == 1 else {
             // asymmetric sets of value insertions (some nil, some not), requires NULL value to satisfy INSERT query
             let combinedSymmetricSetters = try encodables.map { encodable -> [Setter] in
-                let encoder = SQLiteEncoder(userInfo: userInfo, forcingNilValueSetters: true)
+                let encoder = SQLSQLiteEncoder(userInfo: userInfo, forcingNilValueSetters: true)
                 try encodable.encode(to: encoder)
                 return encoder.setters + otherSetters
             }
@@ -122,7 +122,7 @@ extension QueryType {
     /// - Returns: An `INSERT` statement fort the encodable object
     public func upsert(_ encodable: Encodable, userInfo: [CodingUserInfoKey: Any] = [:],
                        otherSetters: [Setter] = [], onConflictOf conflicting: Expressible) throws -> Insert {
-        let encoder = SQLiteEncoder(userInfo: userInfo)
+        let encoder = SQLSQLiteEncoder(userInfo: userInfo)
         try encodable.encode(to: encoder)
         return self.upsert(encoder.setters + otherSetters, onConflictOf: conflicting)
     }
@@ -143,7 +143,7 @@ extension QueryType {
     /// - Returns: An `UPDATE` statement fort the encodable object
     public func update(_ encodable: Encodable, userInfo: [CodingUserInfoKey: Any] = [:],
                        otherSetters: [Setter] = []) throws -> Update {
-        let encoder = SQLiteEncoder(userInfo: userInfo)
+        let encoder = SQLSQLiteEncoder(userInfo: userInfo)
         try encodable.encode(to: encoder)
         return self.update(encoder.setters + otherSetters)
     }
@@ -163,21 +163,21 @@ extension Row {
     }
 
     public func decoder(userInfo: [CodingUserInfoKey: Any] = [:]) -> Decoder {
-        SQLiteDecoder(row: self, userInfo: userInfo)
+        SQLSQLiteDecoder(row: self, userInfo: userInfo)
     }
 }
 
 /// Generates a list of settings for an Encodable object
-private class SQLiteEncoder: Encoder {
+private class SQLSQLiteEncoder: Encoder {
     class SQLiteKeyedEncodingContainer<MyKey: CodingKey>: KeyedEncodingContainerProtocol {
         // swiftlint:disable nesting
         typealias Key = MyKey
 
-        let encoder: SQLiteEncoder
+        let encoder: SQLSQLiteEncoder
         let codingPath: [CodingKey] = []
         let forcingNilValueSetters: Bool
 
-        init(encoder: SQLiteEncoder, forcingNilValueSetters: Bool = false) {
+        init(encoder: SQLSQLiteEncoder, forcingNilValueSetters: Bool = false) {
             self.encoder = encoder
             self.forcingNilValueSetters = forcingNilValueSetters
         }
@@ -190,11 +190,11 @@ private class SQLiteEncoder: Encoder {
             fatalError("SQLiteEncoding does not support super encoders")
         }
 
-        func encodeNil(forKey key: SQLiteEncoder.SQLiteKeyedEncodingContainer<Key>.Key) throws {
+        func encodeNil(forKey key: SQLSQLiteEncoder.SQLiteKeyedEncodingContainer<Key>.Key) throws {
             encoder.setters.append(Expression<String?>(key.stringValue) <- nil)
         }
 
-        func encode(_ value: Int, forKey key: SQLiteEncoder.SQLiteKeyedEncodingContainer<Key>.Key) throws {
+        func encode(_ value: Int, forKey key: SQLSQLiteEncoder.SQLiteKeyedEncodingContainer<Key>.Key) throws {
             encoder.setters.append(Expression(key.stringValue) <- value)
         }
 
@@ -214,7 +214,7 @@ private class SQLiteEncoder: Encoder {
             encoder.setters.append(Expression(key.stringValue) <- value)
         }
 
-        func encodeIfPresent(_ value: Int?, forKey key: SQLiteEncoder.SQLiteKeyedEncodingContainer<Key>.Key) throws {
+        func encodeIfPresent(_ value: Int?, forKey key: SQLSQLiteEncoder.SQLiteKeyedEncodingContainer<Key>.Key) throws {
             if let value = value {
                 try encode(value, forKey: key)
             } else if forcingNilValueSetters {
@@ -357,7 +357,7 @@ private class SQLiteEncoder: Encoder {
     }
 }
 
-private class SQLiteDecoder: Decoder {
+private class SQLSQLiteDecoder: Decoder {
     class SQLiteKeyedDecodingContainer<MyKey: CodingKey>: KeyedDecodingContainerProtocol {
         typealias Key = MyKey
 

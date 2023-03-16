@@ -52,11 +52,11 @@ class FTS4Tests: XCTestCase {
 }
 
 class FTS4ConfigTests: XCTestCase {
-    var config: FTS4Config!
+    var config: SQLFTS4Config!
 
     override func setUp() {
         super.setUp()
-        config = FTS4Config()
+        config = SQLFTS4Config()
     }
 
     func test_empty_config() {
@@ -184,7 +184,7 @@ class FTS4ConfigTests: XCTestCase {
         )
     }
 
-    func sql(_ config: FTS4Config) -> String {
+    func sql(_ config: SQLFTS4Config) -> String {
         virtualTable.create(.FTS4(config))
     }
 }

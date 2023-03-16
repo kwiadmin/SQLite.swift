@@ -2,11 +2,11 @@ import XCTest
 import SQLite
 
 class FTS5Tests: XCTestCase {
-    var config: FTS5Config!
+    var config: SQLFTS5Config!
 
     override func setUp() {
         super.setUp()
-        config = FTS5Config()
+        config = SQLFTS5Config()
     }
 
     func test_empty_config() {
@@ -131,7 +131,7 @@ class FTS5Tests: XCTestCase {
         )
     }
 
-    func sql(_ config: FTS5Config) -> String {
+    func sql(_ config: SQLFTS5Config) -> String {
         virtualTable.create(.FTS5(config))
     }
 }

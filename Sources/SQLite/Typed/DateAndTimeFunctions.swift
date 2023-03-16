@@ -29,7 +29,7 @@ import Foundation
 /// The strftime() function also takes a format string as its first argument.
 ///
 /// https://www.sqlite.org/lang_datefunc.html
-public class DateFunctions {
+public class SQLDateFunctions {
     /// The date() function returns the date in this format: YYYY-MM-DD.
     public static func date(_ timestring: String, _ modifiers: String...) -> Expression<Date?> {
         timefunction("date", timestring: timestring, modifiers: modifiers)
@@ -71,19 +71,19 @@ public class DateFunctions {
 
 extension Date {
     public var date: Expression<Date?> {
-        DateFunctions.date(dateFormatter.string(from: self))
+        SQLDateFunctions.date(dateFormatter.string(from: self))
     }
 
     public var time: Expression<Date?> {
-        DateFunctions.time(dateFormatter.string(from: self))
+        SQLDateFunctions.time(dateFormatter.string(from: self))
     }
 
     public var datetime: Expression<Date?> {
-        DateFunctions.datetime(dateFormatter.string(from: self))
+        SQLDateFunctions.datetime(dateFormatter.string(from: self))
     }
 
     public var julianday: Expression<Date?> {
-        DateFunctions.julianday(dateFormatter.string(from: self))
+        SQLDateFunctions.julianday(dateFormatter.string(from: self))
     }
 }
 

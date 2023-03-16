@@ -17,7 +17,7 @@ class FTSIntegrationTests: SQLiteTestCase {
     private func createIndex() throws {
         try createOrSkip { db in
             try db.run(index.create(.FTS5(
-                FTS5Config()
+                SQLFTS5Config()
                     .column(email)
                     .tokenizer(.Unicode61()))
             ))
@@ -31,7 +31,7 @@ class FTSIntegrationTests: SQLiteTestCase {
     private func createTrigramIndex() throws {
         try createOrSkip { db in
             try db.run(index.create(.FTS5(
-                FTS5Config()
+                SQLFTS5Config()
                   .column(email)
                   .tokenizer(.Trigram(caseSensitive: false)))
             ))
