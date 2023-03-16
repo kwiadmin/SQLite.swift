@@ -33,13 +33,13 @@ import SQLite3
 #endif
 
 /// A single SQL statement.
-public final class Statement {
+public final class SQLStatement {
 
     fileprivate var handle: OpaquePointer?
 
-    fileprivate let connection: Connection
+    fileprivate let connection: SQLConnection
 
-    init(_ connection: Connection, _ SQL: String) throws {
+    init(_ connection: SQLConnection, _ SQL: String) throws {
         self.connection = connection
         try connection.check(sqlite3_prepare_v2(connection.handle, SQL, -1, &handle, nil))
     }
@@ -62,7 +62,7 @@ public final class Statement {
     /// - Parameter values: A list of parameters to bind to the statement.
     ///
     /// - Returns: The statement object (useful for chaining).
-    public func bind(_ values: Binding?...) -> Statement {
+    public func bind(_ values: Binding?...) -> SQLStatement {
         bind(values)
     }
 
@@ -71,7 +71,7 @@ public final class Statement {
     /// - Parameter values: A list of parameters to bind to the statement.
     ///
     /// - Returns: The statement object (useful for chaining).
-    public func bind(_ values: [Binding?]) -> Statement {
+    public func bind(_ values: [Binding?]) -> SQLStatement {
         if values.isEmpty { return self }
         reset()
         guard values.count == Int(sqlite3_bind_parameter_count(handle)) else {
@@ -87,7 +87,7 @@ public final class Statement {
     ///   statement.
     ///
     /// - Returns: The statement object (useful for chaining).
-    public func bind(_ values: [String: Binding?]) -> Statement {
+    public func bind(_ values: [String: Binding?]) -> SQLStatement {
         reset()
         for (name, value) in values {
             let idx = sqlite3_bind_parameter_index(handle, name)
@@ -127,7 +127,7 @@ public final class Statement {
     /// - Throws: `Result.Error` if query execution fails.
     ///
     /// - Returns: The statement object (useful for chaining).
-    @discardableResult public func run(_ bindings: Binding?...) throws -> Statement {
+    @discardableResult public func run(_ bindings: Binding?...) throws -> SQLStatement {
         guard bindings.isEmpty else {
             return try run(bindings)
         }
@@ -142,7 +142,7 @@ public final class Statement {
     /// - Throws: `Result.Error` if query execution fails.
     ///
     /// - Returns: The statement object (useful for chaining).
-    @discardableResult public func run(_ bindings: [Binding?]) throws -> Statement {
+    @discardableResult public func run(_ bindings: [Binding?]) throws -> SQLStatement {
         try bind(bindings).run()
     }
 
@@ -152,7 +152,7 @@ public final class Statement {
     /// - Throws: `Result.Error` if query execution fails.
     ///
     /// - Returns: The statement object (useful for chaining).
-    @discardableResult public func run(_ bindings: [String: Binding?]) throws -> Statement {
+    @discardableResult public func run(_ bindings: [String: Binding?]) throws -> SQLStatement {
         try bind(bindings).run()
     }
 
@@ -199,9 +199,9 @@ public final class Statement {
 
 }
 
-extension Statement: Sequence {
+extension SQLStatement: Sequence {
 
-    public func makeIterator() -> Statement {
+    public func makeIterator() -> SQLStatement {
         reset(clearBindings: false)
         return self
     }
@@ -228,14 +228,14 @@ extension Array {
     }
 }
 
-extension Statement: FailableIterator {
+extension SQLStatement: FailableIterator {
     public typealias Element = [Binding?]
     public func failableNext() throws -> [Binding?]? {
         try step() ? Array(row) : nil
     }
 }
 
-extension Statement {
+extension SQLStatement {
     func prepareRowIterator() -> RowIterator {
         RowIterator(statement: self, columnNames: columnNameMap)
     }
@@ -250,7 +250,7 @@ extension Statement {
     }
 }
 
-extension Statement: CustomStringConvertible {
+extension SQLStatement: CustomStringConvertible {
 
     public var description: String {
         String(cString: sqlite3_sql(handle))
@@ -264,7 +264,7 @@ public struct Cursor {
 
     fileprivate let columnCount: Int
 
-    fileprivate init(_ statement: Statement) {
+    fileprivate init(_ statement: SQLStatement) {
         handle = statement.handle!
         columnCount = statement.columnCount
     }

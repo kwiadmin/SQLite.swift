@@ -4,12 +4,12 @@ import SQLite
 import SQLCipher
 
 class CipherTests: XCTestCase {
-    var db1: Connection!
-    var db2: Connection!
+    var db1: SQLConnection!
+    var db2: SQLConnection!
 
     override func setUpWithError() throws {
-        db1 = try Connection()
-        db2 = try Connection()
+        db1 = try SQLConnection()
+        db2 = try SQLConnection()
         // db1
 
         try db1.key("hello")
@@ -32,7 +32,7 @@ class CipherTests: XCTestCase {
     }
 
     func test_key_blob_literal() throws {
-        let db = try Connection()
+        let db = try SQLConnection()
         try db.key("x'2DD29CA851E7B56E4697B0E1F08507293D761A05CE4D1B628663F411A8086D99'")
     }
 
@@ -55,13 +55,13 @@ class CipherTests: XCTestCase {
         let path = "\(NSTemporaryDirectory())/db.sqlite3"
         _ = try? FileManager.default.removeItem(atPath: path)
 
-        let connA = try Connection(path)
+        let connA = try SQLConnection(path)
         defer { try? FileManager.default.removeItem(atPath: path) }
 
         try connA.key("hello")
         try connA.run("CREATE TABLE foo (bar TEXT)")
 
-        let connB = try Connection(path, readonly: true)
+        let connB = try SQLConnection(path, readonly: true)
 
         do {
             try connB.key("world")
@@ -93,7 +93,7 @@ class CipherTests: XCTestCase {
             try? FileManager.default.setAttributes([FileAttributeKey.immutable: 0], ofItemAtPath: encryptedFile)
         }
 
-        let conn = try Connection(encryptedFile)
+        let conn = try SQLConnection(encryptedFile)
         try conn.key("sqlcipher-test")
         XCTAssertEqual(1, try conn.scalar("SELECT count(*) FROM foo") as? Int64)
     }
@@ -102,7 +102,7 @@ class CipherTests: XCTestCase {
         let tmp = temporaryFile()
         try db1.sqlcipher_export(.uri(tmp), key: "mykey")
 
-        let conn = try Connection(tmp)
+        let conn = try SQLConnection(tmp)
         try conn.key("mykey")
         XCTAssertEqual(1, try conn.scalar("SELECT count(*) FROM foo") as? Int64)
     }

@@ -18,7 +18,7 @@ enum SQLiteFeature {
     }
 }
 
-extension Connection {
+extension SQLConnection {
     func supports(_ feature: SQLiteFeature) -> Bool {
         feature.isSupported(by: sqliteVersion)
     }

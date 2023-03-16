@@ -67,7 +67,7 @@ class FTSIntegrationTests: SQLiteTestCase {
         XCTAssertEqual(1, matches.count)
     }
 
-    private func createOrSkip(_ createIndex: (Connection) throws -> Void) throws {
+    private func createOrSkip(_ createIndex: (SQLConnection) throws -> Void) throws {
         do {
             try createIndex(db)
         } catch let error as Result {

@@ -382,7 +382,7 @@ class QueryTests: XCTestCase {
         }
         let testUUID = UUID()
         let testValue = Test(uuid: testUUID, string: "value")
-        let db = try Connection(.temporary)
+        let db = try SQLConnection(.temporary)
         try db.run(table.create { t in
             t.column(uuid)
             t.column(string)

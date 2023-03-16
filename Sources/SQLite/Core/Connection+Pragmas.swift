@@ -2,7 +2,7 @@ import Foundation
 
 public typealias UserVersion = Int32
 
-public extension Connection {
+public extension SQLConnection {
     /// The user version of the database.
     /// See SQLite [PRAGMA user_version](https://sqlite.org/pragma.html#pragma_user_version)
     var userVersion: UserVersion? {

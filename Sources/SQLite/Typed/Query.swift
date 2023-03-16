@@ -977,7 +977,7 @@ public struct Delete: ExpressionType {
 
 public struct RowIterator: FailableIterator {
     public typealias Element = Row
-    let statement: Statement
+    let statement: SQLStatement
     let columnNames: [String: Int]
 
     public func failableNext() throws -> Row? {
@@ -1002,7 +1002,7 @@ public struct RowIterator: FailableIterator {
     }
 }
 
-extension Connection {
+extension SQLConnection {
 
     public func prepare(_ query: QueryType) throws -> AnySequence<Row> {
         let expression = query.expression

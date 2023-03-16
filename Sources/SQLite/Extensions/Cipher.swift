@@ -3,7 +3,7 @@ import SQLCipher
 
 /// Extension methods for [SQLCipher](https://www.zetetic.net/sqlcipher/).
 /// @see [sqlcipher api](https://www.zetetic.net/sqlcipher/sqlcipher-api/)
-extension Connection {
+extension SQLConnection {
 
     /// - Returns: the SQLCipher version
     ///

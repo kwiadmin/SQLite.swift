@@ -9,7 +9,7 @@ import CSQLite
 import SQLite3
 #endif
 
-extension Connection {
+extension SQLConnection {
     #if SQLITE_SWIFT_SQLCIPHER
     /// See https://www.zetetic.net/sqlcipher/sqlcipher-api/#attach
     public func attach(_ location: Location, as schemaName: String, key: String? = nil) throws {

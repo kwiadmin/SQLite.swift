@@ -324,7 +324,7 @@ class QueryIntegrationTests: SQLiteTestCase {
     }
 }
 
-extension Connection {
+extension SQLConnection {
     func satisfiesMinimumVersion(minor: Int, patch: Int = 0) -> Bool {
         guard let version = try? scalar("SELECT sqlite_version()") as? String else { return false }
         let components = version.split(separator: ".", maxSplits: 3).compactMap { Int($0) }

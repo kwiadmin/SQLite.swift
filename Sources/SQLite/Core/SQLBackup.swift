@@ -37,7 +37,7 @@ import SQLite3
 /// An object representing database backup.
 ///
 /// See: <https://www.sqlite.org/backup.html>
-public final class Backup {
+public final class SQLBackup {
 
     /// The name of the database to backup
     public enum DatabaseName {
@@ -96,8 +96,8 @@ public final class Backup {
         return handle.map { sqlite3_backup_remaining($0) } ?? 0
     }
 
-    private let targetConnection: Connection
-    private let sourceConnection: Connection
+    private let targetConnection: SQLConnection
+    private let sourceConnection: SQLConnection
 
     private var handle: OpaquePointer?
 
@@ -116,9 +116,9 @@ public final class Backup {
     /// - Returns: A new database backup.
     ///
     /// See: <https://www.sqlite.org/c3ref/backup_finish.html#sqlite3backupinit>
-    public init(sourceConnection: Connection,
+    public init(sourceConnection: SQLConnection,
                 sourceName: DatabaseName = .main,
-                targetConnection: Connection,
+                targetConnection: SQLConnection,
                 targetName: DatabaseName = .main) throws {
 
         self.targetConnection = targetConnection

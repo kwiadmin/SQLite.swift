@@ -1,9 +1,9 @@
 import Foundation
 
 public class SchemaReader {
-    private let connection: Connection
+    private let connection: SQLConnection
 
-    init(connection: Connection) {
+    init(connection: SQLConnection) {
         self.connection = connection
     }
 
@@ -98,9 +98,9 @@ public class SchemaReader {
                     table: row[ForeignKeyListTable.tableColumn],
                     column: row[ForeignKeyListTable.fromColumn],
                     primaryKey: row[ForeignKeyListTable.toColumn],
-                    onUpdate: row[ForeignKeyListTable.onUpdateColumn] == TableBuilder.Dependency.noAction.rawValue
+                    onUpdate: row[ForeignKeyListTable.onUpdateColumn] == SQLTableBuilder.Dependency.noAction.rawValue
                         ? nil : row[ForeignKeyListTable.onUpdateColumn],
-                    onDelete: row[ForeignKeyListTable.onDeleteColumn] == TableBuilder.Dependency.noAction.rawValue
+                    onDelete: row[ForeignKeyListTable.onDeleteColumn] == SQLTableBuilder.Dependency.noAction.rawValue
                         ? nil : row[ForeignKeyListTable.onDeleteColumn]
                 )
             }
@@ -132,7 +132,7 @@ private enum SchemaTable {
     private static let masterName = Table("sqlite_master")
     private static let tempMasterName = Table("sqlite_temp_master")
 
-    static func get(for connection: Connection, temp: Bool = false) -> Table {
+    static func get(for connection: SQLConnection, temp: Bool = false) -> Table {
         if connection.supports(.sqliteSchemaTable) {
             return temp ? SchemaTable.tempName : SchemaTable.name
         } else {

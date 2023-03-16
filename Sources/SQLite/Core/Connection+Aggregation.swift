@@ -9,7 +9,7 @@ import CSQLite
 import SQLite3
 #endif
 
-extension Connection {
+extension SQLConnection {
     private typealias Aggregate = @convention(block) (Int, Context, Int32, Argv) -> Void
 
     /// Creates or redefines a custom SQL aggregate.

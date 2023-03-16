@@ -21,44 +21,44 @@ class ConnectionTests: SQLiteTestCase {
     }
 
     func test_init_withInMemory_returnsInMemoryConnection() throws {
-        let db = try Connection(.inMemory)
+        let db = try SQLConnection(.inMemory)
         XCTAssertEqual("", db.description)
     }
 
     func test_init_returnsInMemoryByDefault() throws {
-        let db = try Connection()
+        let db = try SQLConnection()
         XCTAssertEqual("", db.description)
     }
 
     func test_init_withTemporary_returnsTemporaryConnection() throws {
-        let db = try Connection(.temporary)
+        let db = try SQLConnection(.temporary)
         XCTAssertEqual("", db.description)
     }
 
     func test_init_withURI_returnsURIConnection() throws {
-        let db = try Connection(.uri("\(NSTemporaryDirectory())/SQLite.swift Tests.sqlite3"))
+        let db = try SQLConnection(.uri("\(NSTemporaryDirectory())/SQLite.swift Tests.sqlite3"))
         let url = URL(fileURLWithPath: db.description)
         XCTAssertEqual(url.lastPathComponent, "SQLite.swift Tests.sqlite3")
     }
 
     func test_init_withString_returnsURIConnection() throws {
-        let db = try Connection("\(NSTemporaryDirectory())/SQLite.swift Tests.sqlite3")
+        let db = try SQLConnection("\(NSTemporaryDirectory())/SQLite.swift Tests.sqlite3")
         let url = URL(fileURLWithPath: db.description)
         XCTAssertEqual(url.lastPathComponent, "SQLite.swift Tests.sqlite3")
     }
 
     func test_init_with_Uri_and_Parameters() throws {
         let testDb = fixture("test", withExtension: "sqlite")
-        _ = try Connection(.uri(testDb, parameters: [.cache(.shared)]))
+        _ = try SQLConnection(.uri(testDb, parameters: [.cache(.shared)]))
     }
 
     func test_location_without_Uri_parameters() {
-        let location: Connection.Location = .uri("foo")
+        let location: SQLConnection.Location = .uri("foo")
         XCTAssertEqual(location.description, "foo")
     }
 
     func test_location_with_Uri_parameters() {
-        let location: Connection.Location = .uri("foo", parameters: [.mode(.readOnly), .cache(.private)])
+        let location: SQLConnection.Location = .uri("foo", parameters: [.mode(.readOnly), .cache(.private)])
         XCTAssertEqual(location.description, "file:foo?mode=ro&cache=private")
     }
 
@@ -67,7 +67,7 @@ class ConnectionTests: SQLiteTestCase {
     }
 
     func test_readonly_returnsTrueOnReadOnlyConnections() throws {
-        let db = try Connection(readonly: true)
+        let db = try SQLConnection(readonly: true)
         XCTAssertTrue(db.readonly)
     }
 
@@ -167,7 +167,7 @@ class ConnectionTests: SQLiteTestCase {
     }
 
     func test_backup_copiesDatabase() throws {
-        let target = try Connection()
+        let target = try SQLConnection()
 
         try insertUsers("alice", "betsy")
 
@@ -293,7 +293,7 @@ class ConnectionTests: SQLiteTestCase {
     func test_updateHook_setsUpdateHook_withInsert() throws {
         try async { done in
             db.updateHook { operation, db, table, rowid in
-                XCTAssertEqual(Connection.Operation.insert, operation)
+                XCTAssertEqual(SQLConnection.Operation.insert, operation)
                 XCTAssertEqual("main", db)
                 XCTAssertEqual("users", table)
                 XCTAssertEqual(1, rowid)
@@ -307,7 +307,7 @@ class ConnectionTests: SQLiteTestCase {
         try insertUser("alice")
         try async { done in
             db.updateHook { operation, db, table, rowid in
-                XCTAssertEqual(Connection.Operation.update, operation)
+                XCTAssertEqual(SQLConnection.Operation.update, operation)
                 XCTAssertEqual("main", db)
                 XCTAssertEqual("users", table)
                 XCTAssertEqual(1, rowid)
@@ -321,7 +321,7 @@ class ConnectionTests: SQLiteTestCase {
         try insertUser("alice")
         try async { done in
             db.updateHook { operation, db, table, rowid in
-                XCTAssertEqual(Connection.Operation.delete, operation)
+                XCTAssertEqual(SQLConnection.Operation.delete, operation)
                 XCTAssertEqual("main", db)
                 XCTAssertEqual("users", table)
                 XCTAssertEqual(1, rowid)
@@ -428,7 +428,7 @@ class ConnectionTests: SQLiteTestCase {
         // test can fail on iOS/tvOS 9.x: SQLite compile-time differences?
         guard #available(iOS 10.0, OSX 10.10, tvOS 10.0, watchOS 2.2, *) else { return }
 
-        let conn = try Connection("\(NSTemporaryDirectory())/\(UUID().uuidString)")
+        let conn = try SQLConnection("\(NSTemporaryDirectory())/\(UUID().uuidString)")
         try conn.execute("DROP TABLE IF EXISTS test; CREATE TABLE test(value);")
         try conn.run("INSERT INTO test(value) VALUES(?)", 0)
         let queue = DispatchQueue(label: "Readers", attributes: [.concurrent])

@@ -3,12 +3,12 @@ import XCTest
 
 class SQLiteTestCase: XCTestCase {
     private var trace: [String: Int]!
-    var db: Connection!
+    var db: SQLConnection!
     let users = Table("users")
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        db = try Connection()
+        db = try SQLConnection()
         trace = [String: Int]()
 
         db.trace { SQL in
@@ -41,7 +41,7 @@ class SQLiteTestCase: XCTestCase {
         for name in names { try insertUser(name) }
     }
 
-    @discardableResult func insertUser(_ name: String, age: Int? = nil, admin: Bool = false) throws -> Statement {
+    @discardableResult func insertUser(_ name: String, age: Int? = nil, admin: Bool = false) throws -> SQLStatement {
         try db.run("INSERT INTO \"users\" (email, age, admin) values (?, ?, ?)",
                    "\(name)@example.com", age?.datatypeValue, admin.datatypeValue)
     }
@@ -54,7 +54,7 @@ class SQLiteTestCase: XCTestCase {
         )
     }
 
-    func assertSQL(_ SQL: String, _ statement: Statement, _ message: String? = nil, file: StaticString = #file, line: UInt = #line) throws {
+    func assertSQL(_ SQL: String, _ statement: SQLStatement, _ message: String? = nil, file: StaticString = #file, line: UInt = #line) throws {
         try statement.run()
         assertSQL(SQL, 1, message, file: file, line: line)
         if let count = trace[SQL] { trace[SQL] = count - 1 }
